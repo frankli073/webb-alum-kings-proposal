@@ -21,11 +21,16 @@
       color: #0c1222;
       padding: 2rem 1.25rem;
     }
-    .wrap { max-width: 560px; margin: 0 auto; }
+    .wrap { max-width: 720px; margin: 0 auto; }
     h1 {
       font-family: "Libre Baskerville", Georgia, serif;
       color: var(--webb-navy);
       font-size: 1.65rem;
+    }
+    h2 {
+      font-size: 1rem;
+      color: var(--webb-navy);
+      margin: 2rem 0 0.75rem;
     }
     .grid {
       display: grid;
@@ -62,12 +67,38 @@
       font-weight: 600;
       font-size: 0.9rem;
     }
+    .roll {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      background: #fff;
+      border: 2px solid var(--webb-navy);
+    }
+    .roll th,
+    .roll td {
+      border: 1px solid rgba(0, 32, 78, 0.15);
+      padding: 0.5rem 0.65rem;
+      text-align: left;
+    }
+    .roll th {
+      background: var(--webb-navy);
+      color: #fff;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .roll-wrap { overflow-x: auto; }
+    .pending { color: #4a5568; font-style: italic; }
   </style>
 </head>
 <body>
   <div class="wrap">
     <h1>Ballot results</h1>
-    <p>Commissioner view. Entry votes are automatic Yes on page load; additional votes come from the Yes/No buttons.</p>
+    <p>
+      Every row is one member who opened the ballot.
+      <strong>Entry vote</strong> is the automatic Yes on page load.
+      <strong>Additional vote</strong> is from the Yes/No buttons.
+    </p>
     <div id="content">Loading…</div>
     <a class="btn" href="index.html">Back to ballot</a>
   </div>
@@ -82,30 +113,85 @@
         return
       }
 
-      var url =
-        cfg.endpoint +
-        (cfg.endpoint.indexOf('?') >= 0 ? '&' : '?') +
-        'action=stats&secret=' +
-        encodeURIComponent(cfg.secret || '')
+      function apiUrl(action) {
+        return (
+          cfg.endpoint +
+          (cfg.endpoint.indexOf('?') >= 0 ? '&' : '?') +
+          'action=' +
+          action +
+          '&secret=' +
+          encodeURIComponent(cfg.secret || '')
+        )
+      }
 
-      fetch(url)
-        .then(function (r) {
+      function formatWhen(iso) {
+        if (!iso) return '—'
+        try {
+          return new Date(iso).toLocaleString()
+        } catch (e) {
+          return iso
+        }
+      }
+
+      Promise.all([
+        fetch(apiUrl('stats')).then(function (r) {
           return r.json()
-        })
-        .then(function (data) {
+        }),
+        fetch(apiUrl('rows')).then(function (r) {
+          return r.json()
+        }),
+      ])
+        .then(function (pair) {
+          var data = pair[0]
+          var rowsPayload = pair[1]
+
           if (!data.ok) {
             el.innerHTML = '<p class="err">' + (data.error || 'Could not load results') + '</p>'
             return
           }
+
           var sheetLink = cfg.sheetUrl
-            ? '<p><a href="' + cfg.sheetUrl + '" target="_blank" rel="noopener">Open full spreadsheet</a> (names and timestamps).</p>'
-            : '<p>Open the Google Sheet tied to your Apps Script for the full roll call.</p>'
+            ? '<p><a href="' + cfg.sheetUrl + '" target="_blank" rel="noopener">Open Google Sheet</a> (same data, easy to filter and export).</p>'
+            : '<p>Open the Google Sheet bound to your Apps Script project for the same roll call.</p>'
+
+          var tableHtml = ''
+          if (rowsPayload.ok && rowsPayload.rows && rowsPayload.rows.length) {
+            var body = rowsPayload.rows
+              .map(function (row) {
+                var add =
+                  row.additionalVote === 'yes' || row.additionalVote === 'no'
+                    ? row.additionalVote
+                    : '<span class="pending">not yet</span>'
+                return (
+                  '<tr><td>' +
+                  (row.name || '—') +
+                  '</td><td>' +
+                  (row.entryVote || 'yes') +
+                  '</td><td>' +
+                  add +
+                  '</td><td>' +
+                  formatWhen(row.openedAt) +
+                  '</td></tr>'
+                )
+              })
+              .join('')
+            tableHtml =
+              '<h2>Full roll call</h2><div class="roll-wrap"><table class="roll"><thead><tr><th>Name</th><th>Entry vote</th><th>Additional vote</th><th>Opened</th></tr></thead><tbody>' +
+              body +
+              '</tbody></table></div>'
+          } else if (rowsPayload.ok && rowsPayload.error === undefined) {
+            tableHtml = '<h2>Full roll call</h2><p class="pending">No ballots yet.</p>'
+          } else {
+            tableHtml =
+              '<h2>Full roll call</h2><p class="err">Redeploy Apps Script with the latest <code>vote-tracker.gs</code> (Deploy → Manage deployments → Edit → New version) to show the table here. Until then, use the Google Sheet columns <strong>Entry Vote</strong> and <strong>Additional Vote</strong>.</p>'
+          }
+
           el.innerHTML =
             '<div class="grid">' +
             '<div class="stat"><span>Ballots opened</span><strong>' +
             data.ballots +
             '</strong></div>' +
-            '<div class="stat"><span>Entry Yes</span><strong>' +
+            '<div class="stat"><span>Entry Yes (auto)</span><strong>' +
             data.entryYes +
             '</strong></div>' +
             '<div class="stat"><span>Additional Yes</span><strong>' +
@@ -114,14 +200,13 @@
             '<div class="stat"><span>Additional No</span><strong>' +
             data.additionalNo +
             '</strong></div>' +
-            '<div class="stat"><span>Awaiting additional vote</span><strong>' +
-            data.pendingAdditional +
-            '</strong></div>' +
             '</div>' +
+            tableHtml +
             '<p class="meta">Last updated: ' +
             new Date(data.updatedAt).toLocaleString() +
             '. <button type="button" id="refresh" style="font:inherit;cursor:pointer">Refresh</button></p>' +
             sheetLink
+
           document.getElementById('refresh').onclick = function () {
             location.reload()
           }

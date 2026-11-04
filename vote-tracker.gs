@@ -104,6 +104,23 @@ function doGet(e) {
     })
   }
 
+  if (params.action === 'rows') {
+    var sheetRows = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0]
+    ensureHeaders(sheetRows)
+    var all = sheetRows.getDataRange().getValues()
+    var list = []
+    for (var j = 1; j < all.length; j++) {
+      list.push({
+        openedAt: all[j][0] ? new Date(all[j][0]).toISOString() : '',
+        name: all[j][2] || '',
+        entryVote: all[j][3] || 'yes',
+        additionalVote: all[j][4] || '',
+        additionalAt: all[j][5] ? new Date(all[j][5]).toISOString() : '',
+      })
+    }
+    return jsonOut({ ok: true, rows: list, updatedAt: new Date().toISOString() })
+  }
+
   return jsonOut({ ok: true, message: 'Webb Alum Kings vote tracker' })
 }
 
