@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Official proposal for fellow Webb Alum Kings — weekday league operations." />
+  <title>Webb Alum Kings | Official Proposal 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --webb-navy: #00204e;
+      --webb-navy-deep: #001633;
+      --webb-gold: #ffce00;
+      --webb-gold-dim: #e6b800;
+      --paper: #f7f5ef;
+      --ink: #0c1222;
+      --muted: #4a5568;
+      --yes: #1a6b3c;
+      --no: #8b1e1e;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: "Source Sans 3", system-ui, sans-serif;
+      color: var(--ink);
+      background: var(--paper);
+      line-height: 1.55;
+    }
+
+    .stripe-bar {
+      height: 6px;
+      background: repeating-linear-gradient(
+        90deg,
+        var(--webb-navy) 0,
+        var(--webb-navy) 12px,
+        var(--webb-gold) 12px,
+        var(--webb-gold) 24px
+      );
+    }
+
+    .hero {
+      background: linear-gradient(165deg, var(--webb-navy-deep) 0%, var(--webb-navy) 55%, #003366 100%);
+      color: #fff;
+      padding: 2.5rem 1.25rem 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 85% 20%, rgba(255, 206, 0, 0.12), transparent 45%);
+      pointer-events: none;
+    }
+
+    .hero-inner {
+      max-width: 720px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--webb-gold);
+      border: 1px solid rgba(255, 206, 0, 0.45);
+      padding: 0.35rem 0.65rem;
+      margin-bottom: 1rem;
+    }
+
+    .hero h1 {
+      font-family: "Libre Baskerville", Georgia, serif;
+      font-size: clamp(1.85rem, 5vw, 2.75rem);
+      line-height: 1.15;
+      margin: 0 0 0.75rem;
+      font-weight: 700;
+    }
+
+    .hero .lead {
+      font-size: 1.05rem;
+      max-width: 36em;
+      color: rgba(255, 255, 255, 0.88);
+      margin: 0;
+    }
+
+    .hero-meta {
+      margin-top: 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1.25rem;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.75);
+    }
+
+    .hero-meta strong { color: var(--webb-gold); font-weight: 600; }
+
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 4rem;
+    }
+
+    section { margin-bottom: 2.25rem; }
+
+    .section-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--webb-navy);
+      margin-bottom: 0.5rem;
+    }
+
+    h2 {
+      font-family: "Libre Baskerville", Georgia, serif;
+      font-size: 1.45rem;
+      margin: 0 0 1rem;
+      color: var(--webb-navy);
+    }
+
+    .platform-card {
+      background: #fff;
+      border: 1px solid rgba(0, 32, 78, 0.12);
+      border-left: 4px solid var(--webb-gold);
+      padding: 1.25rem 1.35rem;
+      box-shadow: 0 8px 24px rgba(0, 32, 78, 0.06);
+      border-radius: 2px;
+    }
+
+    .platform-card p { margin: 0; font-size: 1.05rem; }
+
+    .effective {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      padding: 0.5rem 0.85rem;
+      background: var(--webb-navy);
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .contact-grid {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .contact-item {
+      background: #fff;
+      border: 1px solid rgba(0, 32, 78, 0.1);
+      padding: 0.85rem 1rem;
+      font-size: 0.95rem;
+    }
+
+    .contact-item strong {
+      display: block;
+      color: var(--webb-navy);
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 0.25rem;
+    }
+
+    .vote-block {
+      background: linear-gradient(180deg, #fff 0%, #faf8f2 100%);
+      border: 2px solid var(--webb-navy);
+      padding: 1.5rem 1.35rem 1.75rem;
+      position: relative;
+    }
+
+    .vote-block::before {
+      content: "BALLOT";
+      position: absolute;
+      top: -0.65rem;
+      left: 1rem;
+      background: var(--webb-gold);
+      color: var(--webb-navy-deep);
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      padding: 0.2rem 0.55rem;
+    }
+
+    .vote-intro {
+      font-size: 0.95rem;
+      color: var(--muted);
+      margin: 0 0 1.25rem;
+    }
+
+    .vote-record {
+      background: var(--webb-navy);
+      color: #fff;
+      padding: 1rem 1.1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .vote-record h3 {
+      margin: 0 0 0.35rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--webb-gold);
+      font-weight: 700;
+    }
+
+    .vote-record .status {
+      font-family: "Libre Baskerville", Georgia, serif;
+      font-size: 1.35rem;
+      margin: 0;
+    }
+
+    .vote-record .sub {
+      margin: 0.5rem 0 0;
+      font-size: 0.88rem;
+      opacity: 0.85;
+    }
+
+    .terms-box {
+      margin-bottom: 1.25rem;
+      border: 1px dashed rgba(0, 32, 78, 0.35);
+      background: #fff;
+    }
+
+    .terms-toggle {
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      border: none;
+      padding: 0.85rem 1rem;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--webb-navy);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .terms-toggle:hover { background: rgba(0, 32, 78, 0.04); }
+
+    .terms-body {
+      padding: 0 1rem 1rem;
+      font-size: 0.88rem;
+      color: var(--muted);
+      display: none;
+    }
+
+    .terms-body.open { display: block; }
+
+    .terms-body p { margin: 0; }
+
+    .terms-note {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin: 0 0 1rem;
+      font-style: italic;
+    }
+
+    .ballot-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 0.85rem 1.75rem;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    .btn:active:not(:disabled) { transform: scale(0.98); }
+
+    .btn-yes {
+      background: var(--yes);
+      color: #fff;
+      border-color: #145530;
+    }
+
+    .btn-yes:hover:not(:disabled) {
+      box-shadow: 0 4px 14px rgba(26, 107, 60, 0.35);
+    }
+
+    .btn-no {
+      background: #fff;
+      color: var(--no);
+      border-color: var(--no);
+    }
+
+    .btn-no:hover:not(:disabled) {
+      background: #fff5f5;
+    }
+
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .vote-message {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      min-height: 1.25em;
+    }
+
+    .vote-message.ok { color: var(--yes); }
+    .vote-message.warn { color: var(--webb-navy); }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+      border-top: 1px solid rgba(0, 32, 78, 0.08);
+    }
+
+    footer span { color: var(--webb-navy); font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="stripe-bar" aria-hidden="true"></div>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Bell Buckle · Tennessee</p>
+      <h1>A Plan for Fellow Webb Alum Kings</h1>
+      <p class="lead">
+        An official proposal to keep weekday league operations moving while our commissioners serve on the front lines elsewhere.
+      </p>
+      <div class="hero-meta">
+        <span><strong>League:</strong> Webb Alum Kings</span>
+        <span><strong>Effective:</strong> November 8, 2026</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section aria-labelledby="problem-heading">
+      <p class="section-label">The challenge</p>
+      <h2 id="problem-heading">Why we need help</h2>
+      <div class="platform-card">
+        <p>
+          Our commissioners are dedicated to the high-pace financial industry and are working toward becoming a doctor to save millions of people. As a result, they may not be able to get back to the members and make changes, even though they are the most capable individuals.
+        </p>
+      </div>
+    </section>
+
+    <section aria-labelledby="proposal-heading">
+      <p class="section-label">The platform</p>
+      <h2 id="proposal-heading">What we are proposing</h2>
+      <div class="platform-card">
+        <p>
+          We should elect Frank to assist the commissioners to take ownership on the weekdays to facilitate the day-to-day operation of the league. Just Monday–Friday.
+        </p>
+        <p class="effective">Takes effect November 8, 2026</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="contact-heading">
+      <p class="section-label">Field offices</p>
+      <h2 id="contact-heading">Questions &amp; emergencies</h2>
+      <div class="contact-grid">
+        <div class="contact-item">
+          <strong>Questions</strong>
+          Text Commissioner Zhong or VC Rbri.
+        </div>
+        <div class="contact-item">
+          <strong>Emergency</strong>
+          Text Interim Commissioner Li.
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="vote-heading">
+      <p class="section-label">Cast your ballot</p>
+      <h2 id="vote-heading">Ready now? Vote below</h2>
+
+      <div class="vote-block">
+        <p class="vote-intro">
+          Fellow Webb Alum Kings: one ballot per member. Your record appears below.
+        </p>
+
+        <div class="vote-record" aria-live="polite">
+          <h3>Your voting record</h3>
+          <p class="status" id="record-status">—</p>
+          <p class="sub" id="record-detail"></p>
+        </div>
+
+        <div class="terms-box">
+          <button type="button" class="terms-toggle" id="terms-toggle" aria-expanded="false" aria-controls="terms-body">
+            Terms &amp; conditions (please review before you vote)
+            <span id="terms-chevron" aria-hidden="true">+</span>
+          </button>
+          <div class="terms-body" id="terms-body" role="region" aria-label="Terms and conditions">
+            <p>
+              <strong>Section 1 — Automatic entry vote.</strong>
+              By loading this ballot page, you are recorded as having cast one (1) vote in favor (“Yes”) of this proposal.
+              The “Yes” and “No” controls below exist solely so you may submit one (1) additional vote - either “Yes” or “No” - to supplement that entry vote.
+              Each member may use those controls at most once.
+              This Section 1 is the entire terms and conditions for this ballot; no other terms apply.
+            </p>
+          </div>
+        </div>
+
+        <p class="terms-note">
+          You are not required to open the terms above to vote, but we ask that you read them when you can.
+        </p>
+
+        <div class="ballot-actions">
+          <button type="button" class="btn btn-yes" id="btn-yes">Yes</button>
+          <button type="button" class="btn btn-no" id="btn-no">No</button>
+        </div>
+        <p class="vote-message" id="vote-message" role="status"></p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>Webb Alum Kings</span> · Unofficial campaign-style ballot for friends &amp; league members
+  </footer>
+
+  <script>
+    (function () {
+      var STORAGE_ENTRY = "wak-entry-vote-v1";
+      var STORAGE_ADDITIONAL = "wak-additional-vote-v1";
+
+      var recordStatus = document.getElementById("record-status");
+      var recordDetail = document.getElementById("record-detail");
+      var btnYes = document.getElementById("btn-yes");
+      var btnNo = document.getElementById("btn-no");
+      var voteMessage = document.getElementById("vote-message");
+      var termsToggle = document.getElementById("terms-toggle");
+      var termsBody = document.getElementById("terms-body");
+      var termsChevron = document.getElementById("terms-chevron");
+
+      function ensureEntryVote() {
+        if (!localStorage.getItem(STORAGE_ENTRY)) {
+          localStorage.setItem(STORAGE_ENTRY, "yes");
+        }
+      }
+
+      function getAdditional() {
+        return localStorage.getItem(STORAGE_ADDITIONAL);
+      }
+
+      function renderRecord() {
+        ensureEntryVote();
+        var additional = getAdditional();
+
+        recordStatus.textContent = "Entry vote: Yes (recorded when you opened this page)";
+
+        if (additional === "yes") {
+          recordDetail.textContent =
+            "Additional ballot: Yes — recorded. Your supplemental vote is counted.";
+          btnYes.disabled = true;
+          btnNo.disabled = true;
+          voteMessage.textContent = "Thank you. Your additional Yes has been recorded.";
+          voteMessage.className = "vote-message ok";
+        } else if (additional === "no") {
+          recordDetail.textContent =
+            "Additional ballot: No — recorded. Your supplemental vote is counted.";
+          btnYes.disabled = true;
+          btnNo.disabled = true;
+          voteMessage.textContent = "Thank you. Your additional No has been recorded.";
+          voteMessage.className = "vote-message ok";
+        } else {
+          recordDetail.textContent =
+            "Additional ballot: not yet submitted. Choose Yes or No below (one time only).";
+          btnYes.disabled = false;
+          btnNo.disabled = false;
+          voteMessage.textContent = "";
+          voteMessage.className = "vote-message";
+        }
+      }
+
+      function castAdditional(value) {
+        if (getAdditional()) return;
+        localStorage.setItem(STORAGE_ADDITIONAL, value);
+        renderRecord();
+      }
+
+      btnYes.addEventListener("click", function () {
+        castAdditional("yes");
+      });
+
+      btnNo.addEventListener("click", function () {
+        castAdditional("no");
+      });
+
+      termsToggle.addEventListener("click", function () {
+        var open = termsBody.classList.toggle("open");
+        termsToggle.setAttribute("aria-expanded", open ? "true" : "false");
+        termsChevron.textContent = open ? "−" : "+";
+      });
+
+      renderRecord();
+    })();
+  </script>
+</body>
+</html>
