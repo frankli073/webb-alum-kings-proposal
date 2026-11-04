@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Webb Alum Kings | Ballot results</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <script src="config.js"></script>
+  <style>
+    :root {
+      --webb-navy: #00204e;
+      --webb-gold: #ffce00;
+      --paper: #f7f5ef;
+    }
+    body {
+      margin: 0;
+      font-family: "Source Sans 3", system-ui, sans-serif;
+      background: var(--paper);
+      color: #0c1222;
+      padding: 2rem 1.25rem;
+    }
+    .wrap { max-width: 560px; margin: 0 auto; }
+    h1 {
+      font-family: "Libre Baskerville", Georgia, serif;
+      color: var(--webb-navy);
+      font-size: 1.65rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+    .stat {
+      background: #fff;
+      border: 2px solid var(--webb-navy);
+      padding: 1rem;
+    }
+    .stat span {
+      display: block;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #4a5568;
+    }
+    .stat strong {
+      font-size: 1.75rem;
+      color: var(--webb-navy);
+    }
+    .meta { font-size: 0.85rem; color: #4a5568; margin-top: 1.25rem; }
+    .err { color: #8b1e1e; font-weight: 600; }
+    a { color: var(--webb-navy); }
+    .btn {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background: var(--webb-navy);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Ballot results</h1>
+    <p>Commissioner view. Entry votes are automatic Yes on page load; additional votes come from the Yes/No buttons.</p>
+    <div id="content">Loading…</div>
+    <a class="btn" href="index.html">Back to ballot</a>
+  </div>
+  <script>
+    (function () {
+      var cfg = window.WAK_VOTE_CONFIG || {}
+      var el = document.getElementById('content')
+
+      if (!cfg.endpoint) {
+        el.innerHTML =
+          '<p class="err">Tracking is not connected yet. Finish Google Sheet setup in vote-tracker.gs and set <code>endpoint</code> in config.js.</p>'
+        return
+      }
+
+      var url =
+        cfg.endpoint +
+        (cfg.endpoint.indexOf('?') >= 0 ? '&' : '?') +
+        'action=stats&secret=' +
+        encodeURIComponent(cfg.secret || '')
+
+      fetch(url)
+        .then(function (r) {
+          return r.json()
+        })
+        .then(function (data) {
+          if (!data.ok) {
+            el.innerHTML = '<p class="err">' + (data.error || 'Could not load results') + '</p>'
+            return
+          }
+          var sheetLink = cfg.sheetUrl
+            ? '<p><a href="' + cfg.sheetUrl + '" target="_blank" rel="noopener">Open full spreadsheet</a> (names and timestamps).</p>'
+            : '<p>Open the Google Sheet tied to your Apps Script for the full roll call.</p>'
+          el.innerHTML =
+            '<div class="grid">' +
+            '<div class="stat"><span>Ballots opened</span><strong>' +
+            data.ballots +
+            '</strong></div>' +
+            '<div class="stat"><span>Entry Yes</span><strong>' +
+            data.entryYes +
+            '</strong></div>' +
+            '<div class="stat"><span>Additional Yes</span><strong>' +
+            data.additionalYes +
+            '</strong></div>' +
+            '<div class="stat"><span>Additional No</span><strong>' +
+            data.additionalNo +
+            '</strong></div>' +
+            '<div class="stat"><span>Awaiting additional vote</span><strong>' +
+            data.pendingAdditional +
+            '</strong></div>' +
+            '</div>' +
+            '<p class="meta">Last updated: ' +
+            new Date(data.updatedAt).toLocaleString() +
+            '. <button type="button" id="refresh" style="font:inherit;cursor:pointer">Refresh</button></p>' +
+            sheetLink
+          document.getElementById('refresh').onclick = function () {
+            location.reload()
+          }
+        })
+        .catch(function () {
+          el.innerHTML =
+            '<p class="err">Could not reach the vote tracker. Check the Apps Script deployment URL and that access is set to Anyone.</p>'
+        })
+    })()
+  </script>
+</body>
+</html>

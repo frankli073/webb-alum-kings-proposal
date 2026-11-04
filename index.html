@@ -324,6 +324,29 @@
     .vote-message.ok { color: var(--yes); }
     .vote-message.warn { color: var(--webb-navy); }
 
+    .name-field {
+      margin-bottom: 1.25rem;
+    }
+
+    .name-field label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--webb-navy);
+      margin-bottom: 0.35rem;
+    }
+
+    .name-field input {
+      width: 100%;
+      max-width: 20rem;
+      padding: 0.65rem 0.85rem;
+      border: 1px solid rgba(0, 32, 78, 0.25);
+      font-family: inherit;
+      font-size: 1rem;
+    }
+
     footer {
       text-align: center;
       padding: 1.5rem;
@@ -411,7 +434,7 @@
           </button>
           <div class="terms-body" id="terms-body" role="region" aria-label="Terms and conditions">
             <p>
-              <strong>Section 1 — Automatic entry vote.</strong>
+              <strong>Section 1 - Automatic entry vote.</strong>
               By loading this ballot page, you are recorded as having cast one (1) vote in favor (“Yes”) of this proposal.
               The “Yes” and “No” controls below exist solely so you may submit one (1) additional vote - either “Yes” or “No” - to supplement that entry vote.
               Each member may use those controls at most once.
@@ -424,6 +447,11 @@
           You are not required to open the terms above to vote, but we ask that you read them when you can.
         </p>
 
+        <div class="name-field">
+          <label for="voter-name">Your name (for the league roll call)</label>
+          <input id="voter-name" name="voter-name" type="text" autocomplete="name" placeholder="First name or nickname" maxlength="80" />
+        </div>
+
         <div class="ballot-actions">
           <button type="button" class="btn btn-yes" id="btn-yes">Yes</button>
           <button type="button" class="btn btn-no" id="btn-no">No</button>
@@ -434,13 +462,19 @@
   </main>
 
   <footer>
-    <span>Webb Alum Kings</span> · Unofficial campaign-style ballot for friends &amp; league members
+    <span>Webb Alum Kings</span> · Unofficial campaign-style ballot for friends &amp; league members<br />
+    <a href="results.html" style="color: var(--webb-navy); font-weight: 600;">Commissioner results</a>
   </footer>
 
+  <script src="config.js"></script>
   <script>
     (function () {
       var STORAGE_ENTRY = "wak-entry-vote-v1";
       var STORAGE_ADDITIONAL = "wak-additional-vote-v1";
+      var STORAGE_VOTER_ID = "wak-voter-id-v1";
+      var STORAGE_NAME = "wak-voter-name-v1";
+      var STORAGE_REPORTED_ENTRY = "wak-reported-entry-v1";
+      var STORAGE_REPORTED_ADDITIONAL = "wak-reported-additional-v1";
 
       var recordStatus = document.getElementById("record-status");
       var recordDetail = document.getElementById("record-detail");
@@ -450,11 +484,73 @@
       var termsToggle = document.getElementById("terms-toggle");
       var termsBody = document.getElementById("terms-body");
       var termsChevron = document.getElementById("terms-chevron");
+      var nameInput = document.getElementById("voter-name");
+
+      var cfg = window.WAK_VOTE_CONFIG || {};
+
+      function getVoterId() {
+        var id = localStorage.getItem(STORAGE_VOTER_ID);
+        if (!id) {
+          id =
+            "v_" +
+            Date.now().toString(36) +
+            "_" +
+            Math.random().toString(36).slice(2, 10);
+          localStorage.setItem(STORAGE_VOTER_ID, id);
+        }
+        return id;
+      }
+
+      function getDisplayName() {
+        var fromInput = nameInput && nameInput.value ? nameInput.value.trim() : "";
+        if (fromInput) {
+          localStorage.setItem(STORAGE_NAME, fromInput);
+          return fromInput;
+        }
+        return localStorage.getItem(STORAGE_NAME) || "";
+      }
+
+      if (nameInput) {
+        var savedName = localStorage.getItem(STORAGE_NAME);
+        if (savedName) nameInput.value = savedName;
+        nameInput.addEventListener("change", function () {
+          var v = nameInput.value.trim();
+          if (v) localStorage.setItem(STORAGE_NAME, v);
+        });
+      }
+
+      function sendToTracker(payload) {
+        if (!cfg.endpoint) return Promise.resolve({ skipped: true });
+        return fetch(cfg.endpoint, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "text/plain" },
+          body: JSON.stringify(
+            Object.assign(
+              {
+                secret: cfg.secret || "",
+                voterId: getVoterId(),
+                name: getDisplayName(),
+              },
+              payload
+            )
+          ),
+        }).then(function () {
+          return { ok: true };
+        });
+      }
 
       function ensureEntryVote() {
         if (!localStorage.getItem(STORAGE_ENTRY)) {
           localStorage.setItem(STORAGE_ENTRY, "yes");
         }
+      }
+
+      function reportEntryIfNeeded() {
+        if (localStorage.getItem(STORAGE_REPORTED_ENTRY)) return;
+        sendToTracker({ type: "entry" }).finally(function () {
+          localStorage.setItem(STORAGE_REPORTED_ENTRY, "1");
+        });
       }
 
       function getAdditional() {
@@ -463,20 +559,21 @@
 
       function renderRecord() {
         ensureEntryVote();
+        reportEntryIfNeeded();
         var additional = getAdditional();
 
         recordStatus.textContent = "Entry vote: Yes (recorded when you opened this page)";
 
         if (additional === "yes") {
           recordDetail.textContent =
-            "Additional ballot: Yes — recorded. Your supplemental vote is counted.";
+            "Additional ballot: Yes - recorded. Your supplemental vote is counted.";
           btnYes.disabled = true;
           btnNo.disabled = true;
           voteMessage.textContent = "Thank you. Your additional Yes has been recorded.";
           voteMessage.className = "vote-message ok";
         } else if (additional === "no") {
           recordDetail.textContent =
-            "Additional ballot: No — recorded. Your supplemental vote is counted.";
+            "Additional ballot: No - recorded. Your supplemental vote is counted.";
           btnYes.disabled = true;
           btnNo.disabled = true;
           voteMessage.textContent = "Thank you. Your additional No has been recorded.";
@@ -486,8 +583,10 @@
             "Additional ballot: not yet submitted. Choose Yes or No below (one time only).";
           btnYes.disabled = false;
           btnNo.disabled = false;
-          voteMessage.textContent = "";
-          voteMessage.className = "vote-message";
+          voteMessage.textContent = cfg.endpoint
+            ? ""
+            : "Note: league-wide tracking is not connected yet (commissioners: see vote-tracker.gs).";
+          voteMessage.className = cfg.endpoint ? "vote-message" : "vote-message warn";
         }
       }
 
@@ -495,6 +594,11 @@
         if (getAdditional()) return;
         localStorage.setItem(STORAGE_ADDITIONAL, value);
         renderRecord();
+        if (!localStorage.getItem(STORAGE_REPORTED_ADDITIONAL)) {
+          sendToTracker({ type: "additional", vote: value }).finally(function () {
+            localStorage.setItem(STORAGE_REPORTED_ADDITIONAL, "1");
+          });
+        }
       }
 
       btnYes.addEventListener("click", function () {
